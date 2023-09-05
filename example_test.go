@@ -22,7 +22,7 @@ func (*DummyTask[T]) RetryAmount() int {
 }
 
 func ExampleDummyTask() {
-	p := pool.New[int](10, 1)
+	p := pool.New[int](1, 1)
 	defer p.Close()
 
 	p.Init()
@@ -31,14 +31,17 @@ func ExampleDummyTask() {
 		if rand.Int()%2 == 0 {
 			return 1, nil
 		}
-		return 0, errors.New("oopsie")
+		return 0, errors.New("oopsie, you are not lucky enough")
 	}
 
 	tw, err := p.Enqueue(&t)
 	if err != nil {
 		log.Fatal(err)
 	}
-	tw.Wait()
 
-	fmt.Println(tw.Result(), tw.Error())
+	if err := tw.Error(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(tw.Result())
 }

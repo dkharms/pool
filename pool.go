@@ -11,7 +11,7 @@ type Task[T any] interface {
 }
 
 type taskWrapper[T any] struct {
-	Task[T]
+	t Task[T]
 
 	result T
 	err    error
@@ -20,10 +20,10 @@ type taskWrapper[T any] struct {
 }
 
 func newTaskWrapper[T any](t Task[T]) *taskWrapper[T] {
-	return &taskWrapper[T]{Task: t, done: make(chan struct{}, 1)}
+	return &taskWrapper[T]{t: t, done: make(chan struct{}, 1)}
 }
 
-func (t *taskWrapper[T]) Finish(v T, err error) {
+func (t *taskWrapper[T]) finish(v T, err error) {
 	t.result, t.err = v, err
 	t.done <- struct{}{}
 	close(t.done)
@@ -72,9 +72,9 @@ func (p *pool[T]) Init() {
 			defer p.inFlight.Done()
 			for t := range p.enqueued {
 				for r := 0; ; r++ {
-					result, err := t.Execute()
-					if err == nil || r == t.RetryAmount() {
-						t.Finish(result, err)
+					result, err := t.t.Execute()
+					if err == nil || r == t.t.RetryAmount() {
+						t.finish(result, err)
 						break
 					}
 				}
