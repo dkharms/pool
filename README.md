@@ -14,15 +14,46 @@
 
 ### About
 
-todo(dkharms): add 'About' section.
+Just a worker pool with regulation of the number of simultaneously running tasks and the number of maximum tasks in the queue.
 
 ### Features
 
-todo(dkharms): add 'Features' section.
+#### Ability to return calculation results.
+
+You don't have to use closures and manage synchronization by yourself – pool will take care of it.
 
 ### How To Start
 
-todo(dkharms): add 'How To Start' section.
+1. Declare task, which satisfies interface `pool.Task`:
+  ```go
+  var _ pool.Task[int] = (*DummyTask[int])(nil)
+
+  type DummyTask[T any] func() (T, error)
+
+  func (t *DummyTask[T]) Execute() (T, error) {
+    return (*t)()
+  }
+
+  func (*DummyTask[T]) RetryAmount() int {
+    return 0
+  }
+  ```
+
+2. Initialize worker pool:
+  ```go
+  p := pool.New[int](1, 1)
+  defer p.Cloe()
+  p.Init()
+  ```
+
+3. Enqueue you task and wait for result or error:
+  ```go
+  tw, err := p.Enqueue(&t)
+  if err != nil {
+      return nil, err
+  }
+  return tw.Result(), tw.Error()
+  ```
 
 ### What's Next
 
