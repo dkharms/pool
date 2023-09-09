@@ -24,7 +24,6 @@ func (*DummyTask[T]) RetryAmount() int {
 func ExampleDummyTask() {
 	p := pool.New[int](1, 1)
 	defer p.Close()
-
 	p.Init()
 
 	var t DummyTask[int] = func() (int, error) {

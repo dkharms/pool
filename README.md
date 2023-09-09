@@ -41,18 +41,27 @@ You don't have to use closures and manage synchronization by yourself – pool 
 
 2. Initialize worker pool:
   ```go
-  p := pool.New[int](1, 1)
-  defer p.Cloe()
-  p.Init()
+  func PoolWithDummyTask() (int, error) {
+    p := pool.New[int](1, 1)
+    defer p.Close()
+    p.Init()
+
+    // …
+  }
   ```
 
 3. Enqueue you task and wait for result or error:
   ```go
-  tw, err := p.Enqueue(&t)
-  if err != nil {
-      return nil, err
+  func PoolWithDummyTask() (int, error) {
+    // …
+
+    tw, err := p.Enqueue(&t)
+    if err != nil {
+        return 0, err
+    }
+
+    return tw.Result(), tw.Error()
   }
-  return tw.Result(), tw.Error()
   ```
 
 ### What's Next
